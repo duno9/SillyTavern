@@ -191,6 +191,8 @@ async function translate(text, lang) {
         switch (extension_settings.translate.provider) {
             case 'google':
                 return await translateProviderGoogle(text, lang);
+            case 'piglatin':
+                return translateToPigLatin(text);
             default:
                 console.error('Unknown translation provider', extension_settings.translate.provider);
                 return text;
@@ -199,6 +201,38 @@ async function translate(text, lang) {
         console.log(error);
         toastr.error('Failed to translate message');
     }
+}
+
+function translateToPigLatin(text) {
+    const words = text.split(' ');
+
+    function isVowel(char) {
+      return 'aeiou'.includes(char.toLowerCase());
+    }
+
+    function wordToPigLatin(word) {
+      if (!word) {
+        return '';
+      }
+
+      let firstVowelIndex = -1;
+      for (let i = 0; i < word.length; i++) {
+        if (isVowel(word[i])) {
+          firstVowelIndex = i;
+          break;
+        }
+      }
+
+      if (firstVowelIndex === 0) {
+        return word + 'way';
+      } else if (firstVowelIndex > 0) {
+        return word.slice(firstVowelIndex) + word.slice(0, firstVowelIndex) + 'ay';
+      } else {
+        return word;
+      }
+    }
+
+    return words.map(wordToPigLatin).join(' ');
 }
 
 async function translateOutgoingMessage(messageId) {
@@ -333,6 +367,7 @@ jQuery(() => {
                 <label for="translation_provider">Provider</label>
                 <select id="translation_provider" name="provider">
                     <option value="google">Google</option>
+                    <option value="piglatin">Pig Latin</option>
                 <select>
                 <label for="translation_target_language">Target Language</label>
                 <select id="translation_target_language" name="target_language"></select>
